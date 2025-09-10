@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from openai import OpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 import os
 
@@ -17,7 +18,9 @@ def callOpenAIbusinessQuestion():
     openai = OpenAI()
 
     question = "Pick a business area that might be worth exploring for an Agentic AI opportunity."
-    messages = [{"role": "user", "content": question}]
+    messages: list[ChatCompletionMessageParam] = [
+    {"role": "user", "content": question}
+]
 
     response = openai.chat.completions.create(
         model="gpt-4o-mini",
@@ -30,7 +33,7 @@ def callOpenAIbusinessQuestion():
 def callOpenAIPainPoint(businessQuestion):
     question = businessQuestion + " Please respond with the answer as a text string point wise"
     openai = OpenAI()
-    messages = [{"role": "user", "content": question}]
+    messages: list[ChatCompletionMessageParam] = [{"role": "user", "content": question}]
     response = openai.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages
@@ -42,7 +45,7 @@ def callOpenAIPainPoint(businessQuestion):
 def callOpenAISolution(businessQuestion, painPoint):
     question = businessQuestion + " and the pain point is " + painPoint + " Please respond with the answer as a text string point wise"
     openai = OpenAI()
-    messages = [{"role": "user", "content": question}]
+    messages: list[ChatCompletionMessageParam] = [{"role": "user", "content": question}]
     response = openai.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages
@@ -59,7 +62,7 @@ if __name__ == "__main__" :
      print(painPoint)
      solution = callOpenAISolution(businessQuestion, painPoint)
      print(solution)
-     print("The solution is: " + solution)
+     print(f"The solution is: {solution}" )
 
 
 

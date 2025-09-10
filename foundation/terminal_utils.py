@@ -9,7 +9,8 @@ import os
 import time
 
 # Global console instance
-console = Console()
+console = Console(emoji=False)
+
 
 def print_markdown(text, title=None):
     """
@@ -26,6 +27,7 @@ def print_markdown(text, title=None):
     else:
         console.print(md)
 
+
 def print_code(code, language="python", title="Code"):
     """
     Display code with syntax highlighting.
@@ -39,21 +41,26 @@ def print_code(code, language="python", title="Code"):
     panel = Panel(syntax, title=title, border_style="green")
     console.print(panel)
 
+
 def print_success(message):
     """Print a success message in green."""
-    console.print(f"[green]✅ {message}[/green]")
+    console.print(f"[green][OK] {message}[/green]")
+
 
 def print_error(message):
     """Print an error message in red."""
-    console.print(f"[red]❌ {message}[/red]")
+    console.print(f"[red][ERROR] {message}[/red]")
+
 
 def print_warning(message):
     """Print a warning message in yellow."""
-    console.print(f"[yellow]⚠️  {message}[/yellow]")
+    console.print(f"[yellow][WARN] {message}[/yellow]")
+
 
 def print_info(message):
     """Print an info message in blue."""
-    console.print(f"[blue]ℹ️  {message}[/blue]")
+    console.print(f"[blue][INFO] {message}[/blue]")
+
 
 def print_table(headers, rows, title="Data Table"):
     """
@@ -73,6 +80,7 @@ def print_table(headers, rows, title="Data Table"):
         table.add_row(*[str(cell) for cell in row])
     
     console.print(table)
+
 
 def show_loading_spinner(description="Processing..."):
     """

@@ -1,6 +1,7 @@
+# from cgi import print_arguments
 from dotenv import load_dotenv
 from openai import OpenAI
-from foundation.terminal_utils import print_success, print_error, print_info, print_markdown
+# from  foundation.terminal_utils import print_success, print_error, print_info, print_markdown
 
 import os
 
@@ -9,9 +10,9 @@ def loadAPIKeys():
     openai_api_key = os.getenv('OPENAI_API_KEY')
 
     if openai_api_key:
-        print_success(f"OpenAI API Key exists and begins {openai_api_key[:8]}")
+        print(f"OpenAI API Key exists and begins {openai_api_key[:8]}") 
     else:
-        print_error("OpenAI API Key not set - please head to the troubleshooting guide in the setup folder")
+        print("OpenAI API Key not set - please head to the troubleshooting guide in the setup folder")
 
 def callOpenAIQuestion():
 
@@ -22,10 +23,10 @@ def callOpenAIQuestion():
 
     response = openai.chat.completions.create(
         model="gpt-4o-mini",
-        messages=messages
+        messages = messages
     )
     question = response.choices[0].message.content
-    print_markdown(f"## Question Generated\n\n{question}")
+    print(f"## Question Generated\n\n{question}")
     return question
 
 def callOpenAIAnswer(question):
@@ -37,14 +38,14 @@ def callOpenAIAnswer(question):
         messages=messages
     )
     answer = response.choices[0].message.content
-    print_markdown(f"## Answer Generated\n\n{answer}")
+    print(f"## Answer Generated\n\n{answer}")
     return answer
 
 
 if __name__ == "__main__" :
-     print_info("Starting IQ Assessment Program...")
+     print("Starting IQ Assessment Program...")
      loadAPIKeys()
      question = callOpenAIQuestion()        
      answer = callOpenAIAnswer(question) 
-     print_success("Assessment completed!")
+     print("Assessment completed!")
 
