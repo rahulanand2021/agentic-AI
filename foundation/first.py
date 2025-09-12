@@ -4,6 +4,7 @@ from openai import OpenAI
 # from  foundation.terminal_utils import print_success, print_error, print_info, print_markdown
 
 import os
+import requests
 
 def loadAPIKeys():
     load_dotenv(override=True)
@@ -41,11 +42,22 @@ def callOpenAIAnswer(question):
     print(f"## Answer Generated\n\n{answer}")
     return answer
 
+def push(message):
+    pushover_user = os.getenv("PUSHOVER_USER")
+    pushover_token = os.getenv("PUSHOVER_TOKEN")
+    pushover_url = "https://api.pushover.net/1/messages.json"
+    print(f"Push: {message}")
+    payload = {"user": pushover_user, "token": pushover_token, "message": message}
+    response = requests.post("https://api.pushover.net/1/messages.json", data=payload)
+    return response.json()
 
 if __name__ == "__main__" :
      print("Starting IQ Assessment Program...")
      loadAPIKeys()
-     question = callOpenAIQuestion()        
-     answer = callOpenAIAnswer(question) 
-     print("Assessment completed!")
+     print(globals()['loadAPIKeys'])
+    #  push("Rahul: Assessment completed!")
+    #  question = callOpenAIQuestion()        
+    #  answer = callOpenAIAnswer(question) 
+    #  print("Assessment completed!")
+    
 
