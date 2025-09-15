@@ -11,7 +11,7 @@ def loadAPIKeys():
     load_dotenv(override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
     google_api_key = os.getenv('GOOGLE_API_KEY')
-
+ 
 record_user_details_json = {
     "name": "record_user_details",
     "description": "Use this tool to record that a user is interested in being in touch and provided an email address",
@@ -61,13 +61,21 @@ class MyProfile:
     def __init__(self):
         self.openai = OpenAI()
         self.name = "Rahul Anand"
-        reader = PdfReader("foundation/self/Profile.pdf")
+        
+        # Get the directory where this script is located
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Use absolute paths to the files
+        profile_pdf_path = os.path.join(script_dir, "self", "Profile.pdf")
+        summary_txt_path = os.path.join(script_dir, "self", "summary.txt")
+        
+        reader = PdfReader(profile_pdf_path)
         self.linkedin = ""
         for page in reader.pages:
             text = page.extract_text()
             if text:
                 self.linkedin += text
-        with open("foundation/self/summary.txt", "r", encoding="utf-8") as f:
+        with open(summary_txt_path, "r", encoding="utf-8") as f:
             self.summary = f.read()
 
     def push(self, text):
