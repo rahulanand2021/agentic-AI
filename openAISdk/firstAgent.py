@@ -1,3 +1,4 @@
+from trace import Trace
 from dotenv import load_dotenv
 from agents import Agent, Runner, trace
 import asyncio
@@ -9,12 +10,10 @@ def loadAPIKeys():
 async def jokester():
 
     agent = Agent(name="Jokester", instructions="You are a Joke Teller", model="gpt-4o-mini")
-    result = await Runner.run(agent, "Tell me a joke about autonomous AI Agents")
 
-    print(result)
-
-
-
+    with trace("Telling a Joke"):
+        result = await Runner.run(agent, "Tell me a joke about autonomous AI Agents")
+        print(result.final_output)
 
 if __name__ == "__main__":
     loadAPIKeys()
