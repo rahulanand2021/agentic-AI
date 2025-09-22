@@ -71,10 +71,36 @@ class SalesAgentManager:
                         Runner.run(self.sales_agents[2], message),
             )
 
-        outputs = [result.final_output for result in results]
-        for output in outputs:
+        self.outputs = [result.final_output for result in results]
+        for output in self.outputs:
             print(output + "\n\n")
 
+    async def best_email_picker(self, outputs=None ) :
+        
+        print("Picking the Best Email ... Please Stand By ..")
+        
+        sales_picker = Agent(
+        name="sales_picker",
+        instructions="You pick the best cold sales email from the given options. \
+        Imagine you are a customer and pick the one you are most likely to respond to. \
+        Do not give an explanation; reply with the selected email only.",
+        model="gpt-4o-mini"
+        )
+
+        if outputs is None:
+            allEmail = self.outputs
+        else :
+            allEmail = outputs
+
+        emails = "Cold sales emails:\n\n" + "\n\nEmail:\n\n".join(allEmail)
+
+        best = await Runner.run(sales_picker, emails)
+
+        print(f"Best sales email:\n{best.final_output}")
+
+    async def main(self):
+        await self.run_parallel_agents()
+        await self.best_email_picker()
 
 if __name__ == "__main__":
     manager = SalesAgentManager()
@@ -82,5 +108,4 @@ if __name__ == "__main__":
     # Run single agent (streaming)
     # asyncio.run(manager.run_agent("Professional Sales Agent"))
 
-    # Run all in parallel
-    asyncio.run(manager.run_parallel_agents())
+    asyncio.run(manager.main())
