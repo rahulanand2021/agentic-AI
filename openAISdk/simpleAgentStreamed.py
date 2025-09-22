@@ -64,8 +64,8 @@ class SalesAgentManager:
 
     async def run_parallel_agents(self, message="Write a cold sales email"):
         """Run all agents in parallel and print outputs"""
-        with trace("Parallel cold emails"):
-            results = await asyncio.gather(
+        
+        results = await asyncio.gather(
                         Runner.run(self.sales_agents[0], message),
                         Runner.run(self.sales_agents[1], message),
                         Runner.run(self.sales_agents[2], message),
@@ -80,7 +80,7 @@ class SalesAgentManager:
         print("Picking the Best Email ... Please Stand By ..")
         
         sales_picker = Agent(
-        name="sales_picker",
+        name="Picking the Best Sales Email",
         instructions="You pick the best cold sales email from the given options. \
         Imagine you are a customer and pick the one you are most likely to respond to. \
         Do not give an explanation; reply with the selected email only.",
@@ -99,8 +99,9 @@ class SalesAgentManager:
         print(f"Best sales email:\n{best.final_output}")
 
     async def main(self):
-        await self.run_parallel_agents()
-        await self.best_email_picker()
+        with trace("Parallel cold emails"):
+            await self.run_parallel_agents()
+            await self.best_email_picker()
 
 if __name__ == "__main__":
     manager = SalesAgentManager()
