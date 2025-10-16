@@ -31,13 +31,28 @@ class WebSearchAgentWithPlannerAndStructuredOutputManager:
     def __init__(self):
         self.load_api_keys()
         self.web_search_planner_agents = self.create_web_search_planner_agents()
-        self.web_search_agents = self.create_web_search_planner_agents()
+        self.web_search_agents = self.create_search_agents()
         self.writer_agent = self.create_writer_agent()
         self.email_agent = self.create_email_agent()
 
     def load_api_keys(self):
         """Load API keys from .env"""
         load_dotenv(override=True)
+
+    def create_search_agents(self):
+        INSTRUCTIONS = "You are a research assistant. Given a search term, you search the web for that term and \
+        produce a concise summary of the results. The summary must 2-3 paragraphs and less than 300 \
+        words. Capture the main points. Write succintly, no need to have complete sentences or good \
+        grammar. This will be consumed by someone synthesizing a report, so it's vital you capture the \
+        essence and ignore any fluff. Do not include any additional commentary other than the summary itself."
+        
+        search_agent = Agent(
+            name="Search Agent",
+            instructions=INSTRUCTIONS,
+            tools=[WebSearchTool(search_context_size="low")],
+            model="gpt-4o-mini",
+            model_settings=ModelSettings(tool_choice="required"),)    
+        return search_agent
 
     def create_web_search_planner_agents(self): #planner agent
 
@@ -128,7 +143,7 @@ class WebSearchAgentWithPlannerAndStructuredOutputManager:
         """ Use the email agent to send an email with the report """
         print("Writing email...")
         result = await Runner.run(self.email_agent, report.markdown_report)
-        print("Email sent")
+        print("Email sent", result.final_output)
 
     async def main(self):   #structured output agent
         query ="Latest AI Agent frameworks in 2025"
