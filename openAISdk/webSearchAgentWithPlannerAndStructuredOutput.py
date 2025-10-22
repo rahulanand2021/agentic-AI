@@ -144,6 +144,7 @@ class WebSearchAgentWithPlannerAndStructuredOutputManager:
         print("Writing email...")
         result = await Runner.run(self.email_agent, report.markdown_report)
         print("Email sent", result.final_output)
+        return report
 
     async def main(self):   #structured output agent
         query ="Latest AI Agent frameworks in 2025"
