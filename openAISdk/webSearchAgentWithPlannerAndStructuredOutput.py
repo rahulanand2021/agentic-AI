@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from agents import Agent, Runner, trace, function_tool, WebSearchTool
+from agents import Agent, Runner, trace, function_tool, WebSearchTool, gen_trace_id
 from agents.model_settings import ModelSettings
 from openai.types.responses import ResponseTextDeltaEvent
 from openai import AsyncOpenAI
@@ -9,6 +9,7 @@ from sendgrid.helpers.mail import Mail, Email, To, Content
 import os
 from typing import Dict
 from pydantic import BaseModel, Field
+import gradio as gr
 
 # Define the Schema of our response - this is known as "Structured Outputs"
 # With massive thanks to student Wes C. for discovering and fixing a nasty bug with this!
@@ -157,6 +158,42 @@ class WebSearchAgentWithPlannerAndStructuredOutputManager:
             await self.send_email(report)  
             print("Hooray!")
 
+    async def run(self, query: str):
+        """ Run the deep research process, yielding the status updates and the final report"""
+        trace_id = gen_trace_id()
+        with trace("Research trace", trace_id=trace_id):
+            print(f"View trace: https://platform.openai.com/traces/trace?trace_id={trace_id}")
+            yield f"View trace: https://platform.openai.com/traces/trace?trace_id={trace_id}"
+            print("Starting research...")
+            search_plan = await self.plan_searches(query)
+            yield "Searches planned, starting to search..."     
+            search_results = await self.perform_searches(search_plan)
+            yield "Searches complete, writing report..."
+            report = await self.write_report(query, search_results)
+            yield "Report written, sending email..."
+            await self.send_email(report)
+            yield "Email sent, research complete"
+            yield report.markdown_report
+
+    async def runGradioUI(self, query: str):
+        async for chunk in WebSearchAgentWithPlannerAndStructuredOutputManager.run(self, query):
+            yield chunk
+    
+    def launchGradioUI(self):
+        with gr.Blocks(theme=gr.themes.Default(primary_hue="sky")) as ui:
+            gr.Markdown("# Deep Research")
+            query_textbox = gr.Textbox(label="What topic would you like to research?")
+            run_button = gr.Button("Run", variant="primary")
+            report = gr.Markdown(label="Report")
+            
+            run_button.click(fn=self.runGradioUI, inputs=query_textbox, outputs=report)
+            query_textbox.submit(fn=self.runGradioUI, inputs=query_textbox, outputs=report)
+
+        ui.launch(inbrowser=True)
+
 if __name__ == "__main__":
     manager = WebSearchAgentWithPlannerAndStructuredOutputManager()
-    asyncio.run(manager.main())
+    
+    # Run the code without the Gradio UI
+    # asyncio.run(manager.main())
+    manager.launchGradioUI()
