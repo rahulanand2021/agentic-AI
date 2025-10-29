@@ -1,0 +1,6 @@
+#Creating a CrewAI project
+crewai create crew debate
+
+
+# Running a CrewAI project
+crewai run
