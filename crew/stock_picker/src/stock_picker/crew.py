@@ -5,6 +5,7 @@ from typing import List
 from pydantic import BaseModel, Field
 import os
 from crewai_tools import SerperDevTool # type: ignore
+from stock_picker.tools.push_tool import PushNotificationTool
 
 class TrendingCompany(BaseModel):
     """A trending company in the news and is attracting attention"""
@@ -54,7 +55,8 @@ class StockPicker():
     @agent
     def stock_picker(self) -> Agent:
         return Agent(
-            config=self.agents_config['stock_picker']
+            config=self.agents_config['stock_picker'],
+            tools=[PushNotificationTool()]
         )
 
     @task
