@@ -18,7 +18,7 @@ def run():
     Run the crew.
     """
     inputs = {
-        'sector': 'Healthcare'
+        'sector': 'Technology'
     }
     
     try:

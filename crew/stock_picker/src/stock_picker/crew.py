@@ -6,6 +6,11 @@ from pydantic import BaseModel, Field
 import os
 from crewai_tools import SerperDevTool # type: ignore
 from stock_picker.tools.push_tool import PushNotificationTool
+from crewai.memory import LongTermMemory, ShortTermMemory, EntityMemory
+from crewai.memory.storage.rag_storage import RAGStorage
+from crewai.memory.storage.ltm_sqlite_storage import LTMSQLiteStorage
+
+
 
 class TrendingCompany(BaseModel):
     """A trending company in the news and is attracting attention"""
@@ -42,7 +47,8 @@ class StockPicker():
     def trending_company_finder(self) -> Agent:
         return Agent(
             config=self.agents_config['trending_company_finder'], # type: ignore[index]
-            tools=[SerperDevTool(api_key=os.getenv('SERPER_API_KEY'))]
+            tools=[SerperDevTool(api_key=os.getenv('SERPER_API_KEY'))],
+            memory=True
         )
 
     @agent
@@ -56,7 +62,8 @@ class StockPicker():
     def stock_picker(self) -> Agent:
         return Agent(
             config=self.agents_config['stock_picker'],
-            tools=[PushNotificationTool()]
+            tools=[PushNotificationTool()],
+            memory=True
         )
 
     @task
@@ -88,10 +95,49 @@ class StockPicker():
             allow_delegation=True
         )
 
+        # Set CHROMA_OPENAI_API_KEY from OPENAI_API_KEY if not already set
+        # This is required by ChromaDB when using OpenAI embeddings
+        if not os.getenv('CHROMA_OPENAI_API_KEY') and os.getenv('OPENAI_API_KEY'):
+            os.environ['CHROMA_OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
+
+        # Long-term memory for persistent storage across sessions
+        long_term_memory = LongTermMemory(
+            storage=LTMSQLiteStorage(
+                db_path="./memory/long_term_memory_storage.db"
+            )
+        )
+        
+        # Short-term memory for current context using RAG
+        short_term_memory = ShortTermMemory(
+            storage=RAGStorage(
+                embedder_config={
+                    "provider": "openai"
+                },
+                type="short_term",
+                path="./memory/short_term_memory"
+            )
+        )
+        
+        # Entity memory for tracking key information about entities
+        entity_memory = EntityMemory(
+            storage=RAGStorage(
+                embedder_config={
+                    "provider": "openai"
+                },
+                type="entity",
+                path="./memory/entity_memory"
+            )
+        )
+
+
         return Crew(
-            agents=self.agents, # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
+            agents=self.agents,
+            tasks=self.tasks, 
             process=Process.hierarchical,
             verbose=True,
-            manager_agent=manager
+            manager_agent=manager,
+            memory=True,
+            short_term_memory=short_term_memory,
+            long_term_memory=long_term_memory,
+            entity_memory=entity_memory
         )
