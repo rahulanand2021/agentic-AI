@@ -14,6 +14,7 @@ from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain.agents import Tool
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import sendgrid
+from mailersend import MailerSendClient, EmailBuilder
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -36,22 +37,52 @@ def searchUsingTools():
         description="Useful for when you need more information from an online search"
     )
     tool_send_email = Tool(
-        name="send_email",
-        func=sendTestEmail,
+        name="sendEmailUsingMailerSend",
+        func=sendEmailUsingMailerSend,
         description="Useful for when you need to send an email"
     )
 
     tools = [tool_search, tool_send_email]
     return tools
 
-def sendTestEmail(body: str):
-    sg = sendgrid.SendGridAPIClient(api_key=os.getenv('SENDGRID_API_KEY'))
-    from_email = Email("rahulanand2006@gmail.com")  # Change to your verified sender
-    to_email = To("rahulanand2005@gmail.com")  # Change to your recipient
-    content = Content("text/plain", body)
-    mail = Mail(from_email, to_email, "Test email", content).get()
-    response = sg.client.mail.send.post(request_body=mail)
-    print(response.status_code)
+## Not using Send Grid since the free trial is expired
+# def sendTestEmail(body: str):
+#     api_key = os.getenv('SENDGRID_API_KEY')
+#     if not api_key:
+#         error_msg = "Error: SENDGRID_API_KEY environment variable is not set. Please check your .env file."
+#         print(error_msg)
+#         return error_msg
+#     sg = sendgrid.SendGridAPIClient(api_key=os.getenv('SENDGRID_API_KEY'))
+#     from_email = Email("rahulanand2006@gmail.com")  # Change to your verified sender
+#     to_email = To("rahulanand2005@gmail.com")  # Change to your recipient
+#     content = Content("text/plain", body)
+#     mail = Mail(from_email, to_email, "Test email", content).get()
+#     response = sg.client.mail.send.post(request_body=mail)
+#     print(response.status_code)
+
+def sendEmailUsingMailerSend(body: str):
+    api_key = os.getenv("MAILERSEND_API_KEY")
+    
+    if not api_key:
+        error_msg = "Error: MAILERSEND_API_KEY environment variable is not set. Please check your .env file."
+        print(error_msg)
+        return error_msg
+
+    # Initialize the MailerSend client
+    client = MailerSendClient(api_key=api_key)
+
+    # Build the email using the EmailBuilder
+    email = (EmailBuilder()
+        .from_email("MS_rEYZQ3@test-y7zpl98918o45vx6.mlsender.net", "Rahul")  # Must be your verified domain/sender
+        .to("rahulanand2005@gmail.com", "Recipient")
+        .subject("Test email")
+        .text(body)
+        .build())
+
+    # Send the email
+    response = client.emails.send(email)
+    print(response)
+    return response
 
 def chatbot(state: State):
     llm = ChatOpenAI(model="gpt-4o-mini")
@@ -78,7 +109,7 @@ def build_langgraph():
 
     # with open(output_path, "wb") as f:
     #     f.write(png_bytes)
-    # return graph
+    return graph
 def chat(user_input: str, history):
     result = graph.invoke({"messages": [{"role": "user", "content": user_input}]})
     return result["messages"][-1].content

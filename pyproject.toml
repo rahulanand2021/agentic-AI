@@ -20,6 +20,7 @@ dependencies = [
     "langgraph-checkpoint-sqlite>=2.0.6",
     "langsmith>=0.3.18",
     "lxml>=5.3.1",
+    "mailersend",
     "mcp-server-fetch>=2025.1.17",
     "mcp[cli]>=1.5.0",
     "openai>=1.68.2",
@@ -44,3 +45,6 @@ dependencies = [
 dev = [
     "ipykernel>=6.29.5",
 ]
+
+[tool.uv.sources]
+mailersend = { git = "https://github.com/mailersend/mailersend-python.git" }
