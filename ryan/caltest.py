@@ -1,29 +1,35 @@
-numbers = [4, '*', 6, '/', 3, '*' , 6, '+', 2 , '-', 10]
+numbers = [5, '-', 0]
+
+error_count = 0
 
 index = 0
 len_num = len(numbers)
 while index < len_num:
     # print("Index", index)
     # print("Length of Numbers", len(numbers))
+    try:
+        if len(numbers) == 1 :
+            break
+        if index == len(numbers): 
+            break  
+        if numbers[index] == '/':
+            div_1 = int(numbers[index - 1])
+            div_2 = int(numbers[index + 1])
+            div_ans = div_1 / div_2
 
-    if len(numbers) == 1 :
+            del numbers[index-1:index+2]
+            # print("Before Insert Division", numbers)
+
+            numbers.insert(index-1, div_ans)
+            # print("After Insert Division", numbers)
+
+            index = 0   # 🔥 restart loop from beginning
+        else:
+            index += 1
+    except ZeroDivisionError:
+        error_count = 1
+        print ("Division By Zero not Possible")
         break
-    if index == len(numbers): 
-        break  
-    if numbers[index] == '/':
-        div_1 = int(numbers[index - 1])
-        div_2 = int(numbers[index + 1])
-        div_ans = div_1 / div_2
-
-        del numbers[index-1:index+2]
-        # print("Before Insert Division", numbers)
-
-        numbers.insert(index-1, div_ans)
-        # print("After Insert Division", numbers)
-
-        index = 0   # 🔥 restart loop from beginning
-    else:
-        index += 1
 
 
 len_num = len(numbers)
@@ -106,4 +112,7 @@ while index < len_num:
     else:
         index += 1
 
-print(numbers)
+if error_count == 0:
+    print("Answer is :", numbers)
+else :
+    print("Please change the inputs to get the results")
