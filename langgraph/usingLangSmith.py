@@ -15,6 +15,8 @@ from langchain.agents import Tool
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import sendgrid
 from mailersend import MailerSendClient, EmailBuilder
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -90,6 +92,8 @@ def chatbot(state: State):
     return {"messages": [llm_with_tools.invoke(state["messages"])]}
 
 def build_langgraph():
+    memory_saver = MemorySaver()
+    # sqlite_saver = SqliteSaver(db_path="langgraph_checkpoints.db") 
     graph_builder = StateGraph(State)
 
     graph_builder.add_node("chatbot", chatbot)
@@ -99,7 +103,7 @@ def build_langgraph():
     graph_builder.add_edge("tools", "chatbot")
     graph_builder.add_edge(START, "chatbot")
     graph_builder.add_edge("chatbot", END)
-    graph = graph_builder.compile()
+    graph = graph_builder.compile(checkpointer=memory_saver)
     
     ## Use Only if you want to build graph images
 
@@ -110,8 +114,16 @@ def build_langgraph():
     # with open(output_path, "wb") as f:
     #     f.write(png_bytes)
     return graph
+
 def chat(user_input: str, history):
-    result = graph.invoke({"messages": [{"role": "user", "content": user_input}]})
+    config = {"configurable": {"thread_id": "1"}}
+    result = graph.invoke({"messages": [{"role": "user", "content": user_input}]}, config=config)
+
+    # Use this to get the state of the graph and the snapshot of the graph
+    # state = graph.get_state(config=config)
+    # print("State : ", state)
+    # # snapshot = list(graph.get_state_history(config=config))
+    # print("Snapshot : ", snapshot)
     return result["messages"][-1].content
 
    
