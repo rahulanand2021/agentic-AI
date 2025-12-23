@@ -14,6 +14,7 @@ from langchain.agents import Tool
 from mailersend import MailerSendClient, EmailBuilder
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.sqlite import SqliteSaver
+import sqlite3
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -89,8 +90,13 @@ def chatbot(state: State):
     return {"messages": [llm_with_tools.invoke(state["messages"])]}
 
 def build_langgraph():
-    memory_saver = MemorySaver()
+    
     # sqlite_saver = SqliteSaver(db_path="langgraph_checkpoints.db") 
+    db_path = "langgraph/sqllite/langgraph_checkpoints.db" 
+    conn = sqlite3.connect(db_path, check_same_thread=False)
+
+    sqlite_memory_saver = SqliteSaver(conn=conn)
+
     graph_builder = StateGraph(State)
 
     graph_builder.add_node("chatbot", chatbot)
@@ -100,7 +106,7 @@ def build_langgraph():
     graph_builder.add_edge("tools", "chatbot")
     graph_builder.add_edge(START, "chatbot")
     graph_builder.add_edge("chatbot", END)
-    graph = graph_builder.compile(checkpointer=memory_saver)
+    graph = graph_builder.compile(checkpointer=sqlite_memory_saver)
     
     ## Use Only if you want to build graph images
 
