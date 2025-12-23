@@ -3,3 +3,10 @@ Use uv add to add it to pyproject.toml for project tracking
 Always use .venv\Scripts\python.exe to run scripts in the virtual environment
 The uv add command automatically updates pyproject.toml and uv.lock
 This keeps your dependencies managed and reproducible.
+
+
+Adding Playwright
+uv pip install playwright
+uv add playwright
+uv run playwright install
+uv run playwright install chromium Optional (Chromium only):
