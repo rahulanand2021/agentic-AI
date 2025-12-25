@@ -4,7 +4,6 @@ from langgraph.graph.message import add_messages
 from dotenv import load_dotenv
 import gradio as gr
 from langgraph.prebuilt import ToolNode, tools_condition    
-import requests
 import os
 from langchain_openai import ChatOpenAI
 from typing import TypedDict
@@ -13,7 +12,7 @@ from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain.agents import Tool
 from mailersend import MailerSendClient, EmailBuilder
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.checkpoint.sqlite import SqliteSaver
+
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
