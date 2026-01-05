@@ -10,3 +10,14 @@ uv pip install playwright
 uv add playwright
 uv run playwright install
 uv run playwright install chromium Optional (Chromium only):
+
+
+To Run MCP Inspector (We would need MCP CLI tools, npm and npx installed along with @modelcontextprotocol/inspector):
+
+uv run mcp dev <mcp_server.py>
+
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+To Activate the .venv environment
+.venv/Scripts/Activate.ps1
